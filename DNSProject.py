@@ -19,6 +19,31 @@ def printResult(res):
 
 task.react(main)
 
+
+————————————————————————————————————————————————————————————————————————
+''' similar result but from server's side
+'''
+from twisted.internet import tast
+from twisted.names import dns
+
+def main(reactor):
+    proto = dns.DNSDatagramProtocol(controller=controller())
+    reactor.listenUDP(10053, proto)
+    
+    return defer.Deferred()
+
+class Controll(object):
+    def messageReceived(self, message, proto, address):
+        print "MESSAGE_RECEIVED", message.queries, "FROM", address
+        message.answer = True
+        message.answer = [
+            dns.RRHEader(message.queries[0].name.name,
+                           payload=dns.Record_A('8.8.8.8'))
+        ]
+        proto.writeMessage(message, address)
+task.react(main)
+
+
 '''
     Source:https://www.youtube.com/watch?v=kuSXK4gNYqw&t=1464s
     learned twisted internet, and dns datagram protocol through this link
